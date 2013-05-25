@@ -1,0 +1,6 @@
+include mclogalyzer/__init__.py
+include mclogalyzer/mclogalyzer.py
+include mclogalyzer/template.html
+include bin/mclogalyzer
+include README.md
+include COPYING

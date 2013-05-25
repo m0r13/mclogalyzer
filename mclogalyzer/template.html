@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Minecraft Server Log Statistics</title>
+		
+		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css">
+		<link rel="stylesheet" href="http://cdn.jsdelivr.net/tablesorter/2.0.5b/addons/pager/jquery.tablesorter.pager.css">
+		
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+		<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="http://cdn.ucb.org.br/Scripts/tablesorter/jquery.tablesorter.min.js"></script>
+		<script>
+		var columns = [
+			[".c-time-played", "Time played", true],
+			[".c-logins", "Logins", false],
+			[".c-login-time", "Time per login", false],
+			[".c-longest-session", "Longest session", false],
+			[".c-active-days", "Active days", false],
+			[".c-active-day-time", "Time per day", false],
+			[".c-messages", "Messages sent", false],
+			[".c-message-time", "Time per message", false],
+		];
+		
+		function addPlaces() {
+			$(".c-place").each(function(index) {
+				$(this).text((index+1) + ".");
+			});
+		}
+		
+		$(document).ready(function() {			
+			addPlaces();
+			
+			columns.forEach(function(value, index, array) {
+				var label = $("<label></label>").attr("class", "checkbox");
+				var input = $("<input />").attr("type", "checkbox");
+				input.change(function() {
+					if(input.is(":checked"))
+						$(value[0]).show();
+					else
+						$(value[0]).hide();
+				});
+				input.attr("checked", value[2]);
+				if(!value[2])
+					$(value[0]).hide();
+					
+				label.append(input);
+				label.append(value[1]);
+				$("#column-select").append(label);
+			});
+
+			$("#page-server").hide();
+			$(".js-link").each(function() {
+				$(this).click(function() {
+					$(".page").hide();
+					$(".nav li").removeClass("active");
+					$("#" + $(this).data("page")).show();
+					$(this).parent().addClass("active");
+				});
+			});
+			
+            $("#stats").tablesorter();
+            $("#stats").bind("sortEnd", addPlaces);
+		});
+		</script> 
+	</head>
+
+	<body>
+		<div class="container-fluid">
+			<div class="navbar navbar-inverse">
+				<div class="navbar-inner">
+					<a class="brand" href="#">Minecraft Server Log Statistics</a>
+					<ul class="nav">
+						<li class="active"><a class="js-link" data-page="page-players" href="#">Players</a></li>
+						<li><a class="js-link" data-page="page-server" href="#">Server</a></li>
+					</ul>
+					<p class="navbar-text pull-right">Last update: {{ last_update }}</p>
+				</div>
+			</div>
+			<div id="page-players" class="page row-fluid">
+				<div id="column-select" class="span2">
+					<h4>Columns</h4>
+				</div>
+				
+				<div class="span10">
+					<table id="stats" class="table table-striped table-bordered tablesorter">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Username</th>
+								<th class="col c-time-played">Time played</th>
+								<th class="col c-logins">Logins</th>
+								<th class="col c-login-time">Time per login</th>
+								<th class="col c-longest-session">Longest session</th>
+								<th class="col c-active-days">Active days</th>
+								<th class="col c-active-day-time">Time per day</th>
+								<th class="col c-messages">Messages sent</th>
+								<th class="col c-message-time">Time per message</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for user in users %}
+							<tr>
+								<td class="c-place"></td>
+								<td>{{ user.username }}</td>
+								<td class="col c-time-played">{{ user.time }}</td>
+								<td class="col c-logins">{{ user.logins }}</td>
+								<td class="col c-login-time">{{ user.time_per_login }}</td>
+								<td class="col c-longest-session">{{ user.longest_session }}</td>
+								<td class="col c-active-days">{{ user.active_days }}</td>
+								<td class="col c-active-day-time">{{ user.time_per_active_day }}</td>
+								<td class="col c-messages">{{ user.messages }}</td>
+								<td class="col c-message-time">{{ user.time_per_message }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div id="page-server" class="page row-fluid">
+				<table class="table table-striped table-bordered">
+				    <tr>
+				        <th>Statistics since:</th>
+				        <td>{{ server.statistics_since }}</td>
+				    </tr>
+				    <tr>
+				        <th>Time played by all players:</th>
+				        <td>{{ server.time_played }}</td>
+				    </tr>
+				    <tr>
+				        <th>Total players:</th>
+				        <td>{{ users|length }}</td>
+				    </tr>
+				    <tr>
+				        <th>Maximum online players:</th>
+				        <td>{{ server.max_players }} ({{ server.max_players_date }})</td>
+				    </tr>
+				</table>
+			</div>
+		</div>
+	</body>
+</html>

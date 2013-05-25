@@ -1,0 +1,1 @@
+from mclogalyzer import main
