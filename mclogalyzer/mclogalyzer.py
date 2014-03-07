@@ -28,8 +28,11 @@ import time
 import jinja2
 
 
+REGEX_IP = "(\d+)\.(\d+)\.(\d+)\.(\d+)"
+
 REGEX_LOGIN_USERNAME = re.compile("\[Server thread\/INFO\]: ([^]]+)\[")
-REGEX_LOGOUT_USERNAMRE = re.compile("\[Server thread\/INFO\]: ([^ ]+) lost connection")
+REGEX_LOGOUT_USERNAME = re.compile("\[Server thread\/INFO\]: ([^ ]+) lost connection")
+REGEX_LOGOUT_USERNAME2 = re.compile("\[Server thread\/INFO\]: GameProfile.*name='([^ ']+)'.* lost connection")
 REGEX_KICK_USERNAME = re.compile("\[INFO\] CONSOLE: Kicked player ([^ ]*)")
 
 # regular expression to get the username of a chat message
@@ -147,10 +150,12 @@ def grep_login_username(line):
 	return username.decode("ascii", "ignore").encode("ascii", "ignore")
 
 def grep_logout_username(line):
-	search = REGEX_LOGOUT_USERNAMRE.search(line)
+	search = REGEX_LOGOUT_USERNAME.search(line)
 	if not search:
-		print "### Warning: Unable to find username:", line
-		return ""
+		search = REGEX_LOGOUT_USERNAME2.search(line)
+		if not search:
+			print "### Warning: Unable to find username:", line
+			return ""
 	username = search.group(1).lstrip().rstrip()
 	return username.decode("ascii", "ignore").encode("ascii", "ignore")
 
