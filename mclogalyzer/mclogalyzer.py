@@ -196,7 +196,7 @@ def parse_logs(logdir, since=None):
 		today = grep_logname_date(logname)
 		if first_date is None:
 			first_date = today
-		print today
+		print "Parsing log %s (%s) ..." % (logname, today)
 		
 		logfile = gzip.open(os.path.join(logdir, logname))
 	
@@ -259,7 +259,6 @@ def parse_logs(logdir, since=None):
 				search = REGEX_CHAT_USERNAME.search(line)
 				if not search:
 					continue
-				print line
 				username = search.group(2)
 				if username in users:
 					users[username]._messages += 1

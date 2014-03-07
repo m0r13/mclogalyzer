@@ -1,20 +1,20 @@
-# mclogalyzer #
+# MCLogalyzer #
 
-This is a small python script to analyze your Minecraft Server log file and to
+This is a small Python script to analyze your Minecraft server log file and to
 generate some nice statistics as HTML-File.
 
-mclogalyzer is free software and available under the GPL license.
+MCLogalyzer is free software and available under the GPL license.
 
 ## Installation ##
 
-To run mclogalyzer you need jinja2 as template engine. You can install it with
+To run MCLogalyzer you need jinja2 as template engine. You can install it with
 pip:
 
 ```
 pip install jinja2
 ```
 
-Then you can install mclogalyzer with the `setup.py` script:
+Then you can install MCLogalyzer with the `setup.py` script:
 
 ```
 python setup.py install 
@@ -26,11 +26,11 @@ Alternatively you can directly run the script `mclogalyzer/mclogalyzer.py`.
 
 ## How to use the script ##
 
-You have to pass the path to the Minecraft Server log file and the path to an
+You have to pass the path to the Minecraft server log directory and the path to an
 output HTML-File to the script:
 
 ```
-mclogalyzer server.log stats.html
+mclogalyzer server/logs stats.html
 ```
 
 Per default the script searches for a template (to generate the output file) in
