@@ -19,13 +19,17 @@
 
 import argparse
 import datetime
-import jinja2
+import gzip
 import os
 import re
 import sys
 import time
 
-REGEX_LOGIN_USERNAME = re.compile("\[INFO\] ([^]]+)\[")
+import jinja2
+
+
+REGEX_LOGIN_USERNAME = re.compile("\[Server thread\/INFO\]: ([^]]+)\[")
+REGEX_LOGOUT_USERNAMRE = re.compile("\[Server thread\/INFO\]: ([^ ]+) lost connection")
 REGEX_KICK_USERNAME = re.compile("\[INFO\] CONSOLE: Kicked player ([^ ]*)")
 
 # regular expression to get the username of a chat message
@@ -117,12 +121,22 @@ class ServerStats:
 	def max_players_date(self):
 		return self._max_players_date
 
-def grep_date(line):
+def grep_logname_date(line):
 	try:
-		d = time.strptime(" ".join(line.split(" ")[:2]), "%Y-%m-%d %H:%M:%S")
+		d = time.strptime("-".join(line.split("-")[:3]), "%Y-%m-%d")
 	except ValueError:
 		return None
-	return datetime.datetime(*(d[0:6]))
+	return datetime.date(*(d[0:3]))
+
+def grep_log_datetime(date, line):
+	try:
+		d = time.strptime(line.split(" ")[0], "[%H:%M:%S]")
+	except ValueError:
+		return None
+	return datetime.datetime(
+		year=date.year, month=date.month, day=date.day,
+		hour=d.tm_hour, minute=d.tm_min, second=d.tm_sec
+	)
 
 def grep_login_username(line):
 	search = REGEX_LOGIN_USERNAME.search(line)
@@ -133,11 +147,11 @@ def grep_login_username(line):
 	return username.decode("ascii", "ignore").encode("ascii", "ignore")
 
 def grep_logout_username(line):
-	split = line.split(" ")
-	if len(split) < 4:
+	search = REGEX_LOGOUT_USERNAMRE.search(line)
+	if not search:
 		print "### Warning: Unable to find username:", line
 		return ""
-	username = split[3].lstrip().rstrip()
+	username = search.group(1).lstrip().rstrip()
 	return username.decode("ascii", "ignore").encode("ascii", "ignore")
 
 def grep_kick_username(line):
@@ -164,81 +178,87 @@ def format_delta(timedelta, days=True, maybe_years=False):
 		return ("%02d days, " % (timedelta.days)) + fmt
 	return fmt
 
-def parse_log(logfile, since=None):
+def parse_logs(logdir, since=None):
 	users = {}
 	server = ServerStats()
 	online_players = set()
 	
-	date_found = False
 	first_date = None
-	for line in logfile:
-		line = line.rstrip()
+	for logname in sorted(os.listdir(logdir)):
+		if not re.match("\d{4}-\d{2}-\d{2}-\d+\.log\.gz", logname):
+			continue
 		
-		if not date_found:
-			first_date = grep_date(line)
-			if first_date is None:
-				continue
-			date_found = True
+		today = grep_logname_date(logname)
+		if first_date is None:
+			first_date = today
+		print today
 		
-		if "logged in with entity id" in line:
-			date = grep_date(line)
-			if date is None or (since is not None and date < since):
-				continue
+		logfile = gzip.open(os.path.join(logdir, logname))
+	
+		for line in logfile:
+			line = line.rstrip()
+			
+			if "logged in with entity id" in line:
+				date = grep_log_datetime(today, line)
+				if date is None or (since is not None and date < since):
+					continue
+					
+				username = grep_login_username(line)
+				if not username:
+					continue
+				if username not in users:
+					users[username] = UserStats(username)
 				
-			username = grep_login_username(line)
-			if not username:
-				continue
-			if username not in users:
-				users[username] = UserStats(username)
-			
-			user = users[username]
-			user._active_days.add((date.year, date.month, date.day))
-			user._logins += 1
-			user._last_login = date
-			
-			online_players.add(username)
-			if len(online_players) > server._max_players:
-				server._max_players = len(online_players)
-				server._max_players_date = date
-									
-		elif "lost connection" in line or "[INFO] CONSOLE: Kicked player" in line:
-			date = grep_date(line)
-			if date is None or (since is not None and date < since):
-				continue
-			
-			username = ""
-			if "lost connection" in line:
-				username = grep_logout_username(line)
-			else:
-				username = grep_kick_username(line)
-
-			if not username or username.startswith("/"):
-				continue
-			if username not in users:
-				continue
-			
-			user = users[username]
-			user._active_days.add((date.year, date.month, date.day))
-			user.handle_logout(date)
-			if username in online_players:
-				online_players.remove(username)
-			
-		elif "[INFO] Stopping server" in line:
-			date = grep_date(line)
-			if date is None or (since is not None and date < since):
-				continue
-			
-			for user in users.values():
+				user = users[username]
+				user._active_days.add((date.year, date.month, date.day))
+				user._logins += 1
+				user._last_login = date
+				
+				online_players.add(username)
+				if len(online_players) > server._max_players:
+					server._max_players = len(online_players)
+					server._max_players_date = date
+										
+			elif "lost connection" in line or "[INFO] CONSOLE: Kicked player" in line:
+				date = grep_log_datetime(today, line)
+				if date is None or (since is not None and date < since):
+					continue
+				
+				username = ""
+				if "lost connection" in line:
+					username = grep_logout_username(line)
+				else:
+					username = grep_kick_username(line)
+					
+				print "logout", date, username
+	
+				if not username or username.startswith("/"):
+					continue
+				if username not in users:
+					continue
+				
+				user = users[username]
+				user._active_days.add((date.year, date.month, date.day))
 				user.handle_logout(date)
-			online_players = set()
-			
-		else:
-			search = REGEX_CHAT_USERNAME.search(line)
-			if not search:
-				continue
-			username = search.group(2)
-			if username in users:
-				users[username]._messages += 1
+				if username in online_players:
+					online_players.remove(username)
+				
+			elif "[INFO] Stopping server" in line:
+				date = grep_log_datetime(today, line)
+				if date is None or (since is not None and date < since):
+					continue
+				
+				for user in users.values():
+					user.handle_logout(date)
+				online_players = set()
+				
+			else:
+				search = REGEX_CHAT_USERNAME.search(line)
+				if not search:
+					continue
+				username = search.group(2)
+				if username in users:
+					users[username]._messages += 1
 				
 	users = users.values()
 	users.sort(key=lambda user: user.time, reverse=True)
@@ -257,9 +277,9 @@ def main():
 	parser.add_argument("--since",
 					help="ignores the log before this date, must be in format year-month-day hour:minute:second",
 					metavar="<datetime>")
-	parser.add_argument("log",
-					help="the server log file",
-					metavar="<logfile>")
+	parser.add_argument("logdir",
+					help="the server log directory",
+					metavar="<logdir>")
 	parser.add_argument("output",
 					help="the output html file",
 					metavar="<outputfile>")
@@ -274,9 +294,7 @@ def main():
 			sys.exit(1)
 		since = datetime.datetime(*(d[0:6]))
 	
-	f = open(args["log"])
-	users, server = parse_log(f, since)
-	f.close()
+	users, server = parse_logs(args["logdir"], since)
 
 	template_path = os.path.join(os.path.dirname(__file__), "template.html")
 	if args["template"] is not None:
