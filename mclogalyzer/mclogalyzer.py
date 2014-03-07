@@ -38,7 +38,7 @@ REGEX_KICK_USERNAME = re.compile("\[INFO\] CONSOLE: Kicked player ([^ ]*)")
 # regular expression to get the username of a chat message
 # you need to change this if you have special chat prefixes or stuff like that
 # this regex works with chat messages of the format: <prefix username> chat message
-REGEX_CHAT_USERNAME = re.compile("\[INFO\] <([^>]*) ([^ ]*)>")
+REGEX_CHAT_USERNAME = re.compile("\[Netty IO #\d/INFO\]: <([^>]* )?([^ ]*)>")
 
 class UserStats:
 	def __init__(self, username=""):
@@ -235,8 +235,6 @@ def parse_logs(logdir, since=None):
 				else:
 					username = grep_kick_username(line)
 					
-				print "logout", date, username
-	
 				if not username or username.startswith("/"):
 					continue
 				if username not in users:
@@ -261,6 +259,7 @@ def parse_logs(logdir, since=None):
 				search = REGEX_CHAT_USERNAME.search(line)
 				if not search:
 					continue
+				print line
 				username = search.group(2)
 				if username in users:
 					users[username]._messages += 1
