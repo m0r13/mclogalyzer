@@ -32,13 +32,13 @@ REGEX_IP = "(\d+)\.(\d+)\.(\d+)\.(\d+)"
 
 REGEX_LOGIN_USERNAME = re.compile("\[Server thread\/INFO\]: ([^]]+)\[")
 REGEX_LOGOUT_USERNAME = re.compile("\[Server thread\/INFO\]: ([^ ]+) lost connection")
-REGEX_LOGOUT_USERNAME2 = re.compile("\[Server thread\/INFO\]: GameProfile.*name='([^ ']+)'.* lost connection")
+REGEX_LOGOUT_USERNAME2 = re.compile("\[Server thread\/INFO\]:.*GameProfile.*name='?([^ ,']+)'?.* lost connection")
 REGEX_KICK_USERNAME = re.compile("\[INFO\] CONSOLE: Kicked player ([^ ]*)")
 
 # regular expression to get the username of a chat message
 # you need to change this if you have special chat prefixes or stuff like that
 # this regex works with chat messages of the format: <prefix username> chat message
-REGEX_CHAT_USERNAME = re.compile("\[Netty IO #\d/INFO\]: <([^>]* )?([^ ]*)>")
+REGEX_CHAT_USERNAME = re.compile("\[Server thread\/INFO\]: <([^>]* )?([^ ]*)>")
 
 class UserStats:
 	def __init__(self, username=""):
@@ -49,12 +49,12 @@ class UserStats:
 		self._last_login = None
 		self._time = datetime.timedelta()
 		self._longest_session = datetime.timedelta()
-		
+
 		self._death_count = 0
 		self._deaths = {}
-		
+
 		self._messages = 0
-		
+
 	def handle_logout(self, date):
 		if self._last_login is None:
 			return
@@ -66,7 +66,7 @@ class UserStats:
 	@property
 	def username(self):
 		return self._username
-		
+
 	@property
 	def logins(self):
 		return self._logins
@@ -78,7 +78,7 @@ class UserStats:
 	@property
 	def time_per_login(self):
 		return format_delta(self._time / self._logins, False)
-		
+
 	@property
 	def active_days(self):
 		return len(self._active_days)
@@ -90,11 +90,11 @@ class UserStats:
 	@property
 	def longest_session(self):
 		return format_delta(self._longest_session, False)
-		
+
 	@property
 	def messages(self):
 		return self._messages
-		
+
 	@property
 	def time_per_message(self):
 		if self._messages == 0:
@@ -107,19 +107,19 @@ class ServerStats:
 		self._time_played = datetime.timedelta()
 		self._max_players = 0
 		self._max_players_date = None
-		
+
 	@property
 	def statistics_since(self):
 		return self._statistics_since
-		
+
 	@property
 	def time_played(self):
 		return format_delta(self._time_played, True, True)
-	
+
 	@property
 	def max_players(self):
 		return self._max_players
-	
+
 	@property
 	def max_players_date(self):
 		return self._max_players_date
@@ -187,74 +187,74 @@ def parse_logs(logdir, since=None):
 	users = {}
 	server = ServerStats()
 	online_players = set()
-	
+
 	first_date = None
 	for logname in sorted(os.listdir(logdir)):
 		if not re.match("\d{4}-\d{2}-\d{2}-\d+\.log\.gz", logname):
 			continue
-		
+
 		today = grep_logname_date(logname)
 		if first_date is None:
 			first_date = today
 		print "Parsing log %s (%s) ..." % (logname, today)
-		
+
 		logfile = gzip.open(os.path.join(logdir, logname))
-	
+
 		for line in logfile:
 			line = line.rstrip()
-			
+
 			if "logged in with entity id" in line:
 				date = grep_log_datetime(today, line)
 				if date is None or (since is not None and date < since):
 					continue
-					
+
 				username = grep_login_username(line)
 				if not username:
 					continue
 				if username not in users:
 					users[username] = UserStats(username)
-				
+
 				user = users[username]
 				user._active_days.add((date.year, date.month, date.day))
 				user._logins += 1
 				user._last_login = date
-				
+
 				online_players.add(username)
 				if len(online_players) > server._max_players:
 					server._max_players = len(online_players)
 					server._max_players_date = date
-										
+
 			elif "lost connection" in line or "[INFO] CONSOLE: Kicked player" in line:
 				date = grep_log_datetime(today, line)
 				if date is None or (since is not None and date < since):
 					continue
-				
+
 				username = ""
 				if "lost connection" in line:
 					username = grep_logout_username(line)
 				else:
 					username = grep_kick_username(line)
-					
+
 				if not username or username.startswith("/"):
 					continue
 				if username not in users:
 					continue
-				
+
 				user = users[username]
 				user._active_days.add((date.year, date.month, date.day))
 				user.handle_logout(date)
 				if username in online_players:
 					online_players.remove(username)
-				
+
 			elif "[INFO] Stopping server" in line:
 				date = grep_log_datetime(today, line)
 				if date is None or (since is not None and date < since):
 					continue
-				
+
 				for user in users.values():
 					user.handle_logout(date)
 				online_players = set()
-				
+
 			else:
 				search = REGEX_CHAT_USERNAME.search(line)
 				if not search:
@@ -262,19 +262,19 @@ def parse_logs(logdir, since=None):
 				username = search.group(2)
 				if username in users:
 					users[username]._messages += 1
-				
+
 	users = users.values()
 	users.sort(key=lambda user: user.time, reverse=True)
-	
+
 	server._statistics_since = since if since is not None else first_date
 	for user in users:
 		server._time_played += user._time
-	
+
 	return users, server
 
 def main():
 	parser = argparse.ArgumentParser(description="Analyzes the Minecraft Server Log files and generates some statistics.")
-	parser.add_argument("-t", "--template", 
+	parser.add_argument("-t", "--template",
 					help="the template to generate the output file",
 					metavar="template")
 	parser.add_argument("--since",
@@ -287,7 +287,7 @@ def main():
 					help="the output html file",
 					metavar="<outputfile>")
 	args = vars(parser.parse_args())
-	
+
 	since = None
 	if args["since"] is not None:
 		try:
@@ -296,7 +296,7 @@ def main():
 			print "Invalid datetime format! The format must be year-month-day hour:minute:second ."
 			sys.exit(1)
 		since = datetime.datetime(*(d[0:6]))
-	
+
 	users, server = parse_logs(args["logdir"], since)
 
 	template_path = os.path.join(os.path.dirname(__file__), "template.html")
@@ -308,16 +308,16 @@ def main():
 	#print template_dir, template_name
 	if not os.path.exists(template_path):
 		print "Unable to find template file %s!" % template_path
-		sys.exit(1) 
-	
+		sys.exit(1)
+
 	env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir))
 	template = env.get_template(template_name)
-	
+
 	f = open(args["output"], "w")
-	f.write(template.render(users=users, 
+	f.write(template.render(users=users,
 							server=server,
 							last_update=time.strftime("%Y-%m-%d %H:%M:%S")))
 	f.close()
-	
+
 if __name__ == "__main__":
 	main()
