@@ -46,6 +46,8 @@ class UserStats:
 		self._logins = 0
 
 		self._active_days = set()
+		self._prev_login = None
+		self._first_login = None
 		self._last_login = None
 		self._time = datetime.timedelta()
 		self._longest_session = datetime.timedelta()
@@ -56,12 +58,12 @@ class UserStats:
 		self._messages = 0
 
 	def handle_logout(self, date):
-		if self._last_login is None:
+		if self._prev_login is None:
 			return
-		session = date - self._last_login
+		session = date - self._prev_login
 		self._time += session
 		self._longest_session = max(self._longest_session, session)
-		self._last_login = None
+		self._prev_login = None
 
 	@property
 	def username(self):
@@ -86,6 +88,14 @@ class UserStats:
 	@property
 	def time_per_active_day(self):
 		return format_delta(self._time / self.active_days, False)
+
+	@property
+	def first_login(self):
+		return str(self._first_login)
+
+	@property
+	def last_login(self):
+		return str(self._last_login)
 
 	@property
 	def longest_session(self):
@@ -217,7 +227,9 @@ def parse_logs(logdir, since=None):
 				user = users[username]
 				user._active_days.add((date.year, date.month, date.day))
 				user._logins += 1
-				user._last_login = date
+				user._last_login = user._prev_login = date
+				if user._first_login is None:
+					user._first_login = date
 
 				online_players.add(username)
 				if len(online_players) > server._max_players:
