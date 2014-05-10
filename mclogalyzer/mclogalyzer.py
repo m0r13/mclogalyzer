@@ -24,9 +24,9 @@ import os
 import re
 import sys
 import time
+import json
 
 import jinja2
-
 
 REGEX_IP = "(\d+)\.(\d+)\.(\d+)\.(\d+)"
 
@@ -79,7 +79,7 @@ class UserStats:
 
 	@property
 	def time_per_login(self):
-		return format_delta(self._time / self._logins, False)
+		return format_delta(self._time / self._logins if self._logins != 0 else datetime.timedelta(), False)
 
 	@property
 	def active_days(self):
@@ -87,7 +87,7 @@ class UserStats:
 
 	@property
 	def time_per_active_day(self):
-		return format_delta(self._time / self.active_days, False)
+		return format_delta(self._time / self.active_days if self.active_days != 0 else datetime.timedelta(), False)
 
 	@property
 	def first_login(self):
@@ -109,7 +109,7 @@ class UserStats:
 	def time_per_message(self):
 		if self._messages == 0:
 			return "<div class='text-center'>-</div>"
-		return format_delta(self._time / self._messages)
+		return format_delta(self._time / self._messages if self._messages != 0 else datetime.timedelta())
 
 class ServerStats:
 	def __init__(self):
@@ -193,7 +193,11 @@ def format_delta(timedelta, days=True, maybe_years=False):
 		return ("%02d days, " % (timedelta.days)) + fmt
 	return fmt
 
-def parse_logs(logdir, since=None):
+def parse_whitelist(whitelist_path):
+	json_data = json.load(open(whitelist_path))
+	return map(lambda x: x["name"], json_data)
+
+def parse_logs(logdir, since=None, whitelist_users=None):
 	users = {}
 	server = ServerStats()
 	online_players = set()
@@ -221,20 +225,21 @@ def parse_logs(logdir, since=None):
 				username = grep_login_username(line)
 				if not username:
 					continue
-				if username not in users:
-					users[username] = UserStats(username)
 
-				user = users[username]
-				user._active_days.add((date.year, date.month, date.day))
-				user._logins += 1
-				user._last_login = user._prev_login = date
-				if user._first_login is None:
-					user._first_login = date
+				if whitelist_users is None or username in whitelist_users:
+					if username not in users:
+						users[username] = UserStats(username)
+					user = users[username]
+					user._active_days.add((date.year, date.month, date.day))
+					user._logins += 1
+					user._last_login = user._prev_login = date
+					if user._first_login is None:
+						user._first_login = date
 
-				online_players.add(username)
-				if len(online_players) > server._max_players:
-					server._max_players = len(online_players)
-					server._max_players_date = date
+					online_players.add(username)
+					if len(online_players) > server._max_players:
+						server._max_players = len(online_players)
+						server._max_players_date = date
 
 			elif "lost connection" in line or "[INFO] CONSOLE: Kicked player" in line:
 				date = grep_log_datetime(today, line)
@@ -275,12 +280,19 @@ def parse_logs(logdir, since=None):
 				if username in users:
 					users[username]._messages += 1
 
+	if whitelist_users is not None:
+		for username in whitelist_users:
+			if username not in users:
+				users[username] = UserStats(username)
+
+
 	users = users.values()
 	users.sort(key=lambda user: user.time, reverse=True)
 
 	server._statistics_since = since if since is not None else first_date
 	for user in users:
 		server._time_played += user._time
+
 
 	return users, server
 
@@ -292,6 +304,9 @@ def main():
 	parser.add_argument("--since",
 					help="ignores the log before this date, must be in format year-month-day hour:minute:second",
 					metavar="<datetime>")
+	parser.add_argument("-w", "--whitelist",
+					help="the whitelist of the server (only use included usernames)",
+					metavar="<whitelist>")
 	parser.add_argument("logdir",
 					help="the server log directory",
 					metavar="<logdir>")
@@ -309,7 +324,8 @@ def main():
 			sys.exit(1)
 		since = datetime.datetime(*(d[0:6]))
 
-	users, server = parse_logs(args["logdir"], since)
+	whitelist_users = parse_whitelist(args["whitelist"]) if args["whitelist"] else None
+	users, server = parse_logs(args["logdir"], since, whitelist_users)
 
 	template_path = os.path.join(os.path.dirname(__file__), "template.html")
 	if args["template"] is not None:
