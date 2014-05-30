@@ -42,3 +42,7 @@ You can also skip a part of the log file by specifying a time where the script
 should start analyzing. To do this use the `--since` parameter. You have to
 specify the time in the format `year-month-day hour:minute:second`, for example
 `--since="2013-05-16 00:00:00"`.
+
+You can use the whitelist as a guide using `--w whitelist.json`. If so, users
+not included in the whitelist will be removed from final results, and users not
+present in log file but present in whitelist will be added to the output.
