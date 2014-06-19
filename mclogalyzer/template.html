@@ -17,6 +17,7 @@
 			[".c-first-login", "First login", false],
 			[".c-last-login", "Last login", false],
 			[".c-longest-session", "Longest session", false],
+			[".c-deaths", "Deaths", false],
 			[".c-active-days", "Active days", false],
 			[".c-active-day-time", "Time per day", false],
 			[".c-messages", "Messages sent", false],
@@ -51,6 +52,11 @@
 			});
 
 			$("#page-server").hide();
+
+			{% for user in users %}
+			$("#page-{{ user.username }}").hide();
+			{% endfor %}
+
 			$(".js-link").each(function() {
 				$(this).click(function() {
 					$(".page").hide();
@@ -95,6 +101,7 @@
 								<th class="col c-first-login">First login</th>
 								<th class="col c-last-login">Last login</th>
 								<th class="col c-longest-session">Longest session</th>
+								<th class="col c-deaths">Deaths</th>
 								<th class="col c-active-days">Active days</th>
 								<th class="col c-active-day-time">Time per day</th>
 								<th class="col c-messages">Messages sent</th>
@@ -105,13 +112,14 @@
 							{% for user in users %}
 							<tr>
 								<td class="c-place"></td>
-								<td>{{ user.username }}</td>
+								<td><a class="js-link" data-page="page-{{ user.username }}" href="#">{{ user.username }}</a></td>
 								<td class="col c-time-played">{{ user.time }}</td>
 								<td class="col c-logins">{{ user.logins }}</td>
 								<td class="col c-login-time">{{ user.time_per_login }}</td>
 								<td class="col c-first-login">{{ user.first_login }}</td>
 								<td class="col c-last-login">{{ user.last_login }}</td>
 								<td class="col c-longest-session">{{ user.longest_session }}</td>
+								<td class="col c-deaths">{{ user.death_count }}</td>
 								<td class="col c-active-days">{{ user.active_days }}</td>
 								<td class="col c-active-day-time">{{ user.time_per_active_day }}</td>
 								<td class="col c-messages">{{ user.messages }}</td>
@@ -142,6 +150,67 @@
 				    </tr>
 				</table>
 			</div>
+			{% for user in users %}
+			<div id="page-{{ user.username }}" class="page row-fluid">
+				<h4>Player Statistics for {{user.username }}</h4>
+				<table class="table table-striped table-bordered">
+				    <tr>
+				        <th>Time Played:</th>
+				        <td>{{ user.time }}</td>
+				    </tr>
+				    <tr>
+				        <th>Logins:</th>
+				        <td>{{ user.logins }}</td>
+				    </tr>
+				    <tr>
+				        <th>Time per Login:</th>
+				        <td>{{ user.time_per_login }}</td>
+				    </tr>
+				    <tr>
+				        <th>First Login:</th>
+				        <td>{{ user.first_login }}</td>
+				    </tr>
+				    <tr>
+				        <th>Last Login:</th>
+				        <td>{{ user.last_login }}</td>
+				    </tr>
+				    <tr>
+				        <th>Longest Session:</th>
+				        <td>{{ user.longest_session }}</td>
+				    </tr>
+				    <tr>
+				        <th>Active Days:</th>
+				        <td>{{ user.active_days }}</td>
+				    </tr>
+				    <tr>
+				        <th>Time per Day:</th>
+				        <td>{{ user.time_per_active_day }}</td>
+				    </tr>
+				    <tr>
+				        <th>Messages Sent:</th>
+				        <td>{{ user.messages }}</td>
+				    </tr>
+				    <tr>
+				        <th>Time per Message:</th>
+				        <td>{{ user.time_per_message }}</td>
+				    </tr>
+				    <tr>
+				        <th>Deaths:</th>
+				        <td>{{ user.death_count }}</td>
+				    </tr>
+				    <tr>
+				        <th>Types of Deaths:</th>
+				        <td></td>
+				    </tr>
+				{% for death in user.death_types %}
+				    <tr>
+				        <th></th>
+				        <td>{{ death }}</td>
+				    </tr>
+				{% endfor %}
+				</table>
+			</div>
+			{% endfor %}
 		</div>
 	</body>
 </html>
