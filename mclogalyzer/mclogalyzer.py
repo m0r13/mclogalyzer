@@ -225,13 +225,11 @@ def grep_kick_username(line):
 	return search.group(1)[:-1].decode("ascii", "ignore").encode("ascii", "ignore")
 
 def grep_death(line):
-	for death_message_regex in REGEX_DEATH_MESSAGES:
-		search = death_message_regex.search(line)
-		if not search:
-			continue
-		else:
-			return (search.group(1), search.group(2))
-	return (None, None)
+	for regex in REGEX_DEATH_MESSAGES:
+		search = regex.search(line)
+		if search:
+			return search.group(1), search.group(2)
+	return None, None
 
 def format_delta(timedelta, days=True, maybe_years=False):
 	seconds = timedelta.seconds
@@ -330,27 +328,25 @@ def parse_logs(logdir, since=None, whitelist_users=None):
 				online_players = set()
 
 			else:
-				(death_username, death_type) = grep_death(line)
+				death_username, death_type = grep_death(line)
 				if death_username is not None:
-					print line
 					if death_username in users:
 						death_user = users[death_username]
 						death_user._death_count += 1
 						if death_type not in death_user._death_types:
 							death_user._death_types.add(death_type)
-
-				search = REGEX_CHAT_USERNAME.search(line)
-				if not search:
-					continue
-				username = search.group(2)
-				if username in users:
-					users[username]._messages += 1
+				else:
+					search = REGEX_CHAT_USERNAME.search(line)
+					if not search:
+						continue
+					username = search.group(2)
+					if username in users:
+						users[username]._messages += 1
 
 	if whitelist_users is not None:
 		for username in whitelist_users:
 			if username not in users:
 				users[username] = UserStats(username)
-
 
 	users = users.values()
 	users.sort(key=lambda user: user.time, reverse=True)
