@@ -161,8 +161,7 @@ class UserStats:
 
 	@property
 	def death_types(self):
-		return self._death_types.items()
-
+		return sorted(self._death_types.items(), key=lambda k: k[1])
 
 class ServerStats:
 	def __init__(self):
