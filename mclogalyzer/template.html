@@ -206,12 +206,14 @@
 										<th>Type of Death</th>
 									</tr>
 								</thead>
+								<tbody>
 								{% for death, count in user.death_types %}
 								<tr>
 									<td>{{ count }}</td>
 									<td>{{ death }}</td>
 								</tr>
 								{% endfor %}
+								</tbody>
 							</table>
 						</td>
 					</tr>
