@@ -200,20 +200,16 @@
 						<th>Types of Deaths:</th>
 						<td>
 							<table class="table table-striped table-bordered">
-								<thead>
-									<tr>
-										<th>Count</th>
-										<th>Type of Death</th>
-									</tr>
-								</thead>
-								<tbody>
+								<tr>
+									<th>Count</th>
+									<th>Type of Death</th>
+								</tr>
 								{% for death, count in user.death_types %}
 								<tr>
 									<td>{{ count }}</td>
 									<td>{{ death }}</td>
 								</tr>
 								{% endfor %}
-								</tbody>
 							</table>
 						</td>
 					</tr>
