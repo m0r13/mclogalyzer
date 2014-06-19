@@ -40,40 +40,44 @@ REGEX_KICK_USERNAME = re.compile("\[INFO\] CONSOLE: Kicked player ([^ ]*)")
 # this regex works with chat messages of the format: <prefix username> chat message
 REGEX_CHAT_USERNAME = re.compile("\[Server thread\/INFO\]: <([^>]* )?([^ ]*)>")
 
-death_messages = set()
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was squashed by.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was pricked to death)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (walked into a cactus whilst trying to escape.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (drowned.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (blew up)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was blown up by.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (fell from a high place.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (hit the ground too hard)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (fell off a ladder)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (fell off some vines)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (fell out of the water)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (fell into a patch of.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was doomed to fall.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was shot off.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was blown from a high place.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (went up in flames)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (burned to death)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was burnt to a crisp whilst fighting.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (walked into a fire whilst fighting.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was slain by.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was shot by.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was fireballed by.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was killed.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (got finished off by.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (tried to swim in lava.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (died)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (starved to death)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (suffocated in a wall)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was pummeled by.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (fell out of the world)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (was knocked into the void.*)"))
-death_messages.add (re.compile("\Server thread\/INFO\]: ([^ ]+) (withered away)"))
+DEATH_MESSAGES = (
+	"was squashed by.*",
+	"was pricked to death",
+	"walked into a cactus whilst trying to escape.*",
+	"drowned.*",
+	"blew up",
+	"was blown up by.*",
+	"fell from a high place.*",
+	"hit the ground too hard",
+	"fell off a ladder",
+	"fell off some vines",
+	"fell out of the water",
+	"fell into a patch of.*",
+	"was doomed to fall.*",
+	"was shot off.*",
+	"was blown from a high place.*",
+	"went up in flames",
+	"burned to death",
+	"was burnt to a crisp whilst fighting.*",
+	"walked into a fire whilst fighting.*",
+	"was slain by.*",
+	"was shot by.*",
+	"was fireballed by.*",
+	"was killed.*",
+	"got finished off by.*",
+	"tried to swim in lava.*",
+	"died",
+	"starved to death",
+	"suffocated in a wall",
+	"was pummeled by.*",
+	"fell out of the world",
+	"was knocked into the void.*",
+	"withered away",
+)
 
+REGEX_DEATH_MESSAGES = set()
+for message in DEATH_MESSAGES:
+	REGEX_DEATH_MESSAGES.add(re.compile("\Server thread\/INFO\]: ([^ ]+) (" + message + ")"))
 
 class UserStats:
 	def __init__(self, username=""):
@@ -221,7 +225,7 @@ def grep_kick_username(line):
 	return search.group(1)[:-1].decode("ascii", "ignore").encode("ascii", "ignore")
 
 def grep_death(line):
-	for death_message_regex in death_messages:
+	for death_message_regex in REGEX_DEATH_MESSAGES:
 		search = death_message_regex.search(line)
 		if not search:
 			continue
@@ -328,6 +332,7 @@ def parse_logs(logdir, since=None, whitelist_users=None):
 			else:
 				(death_username, death_type) = grep_death(line)
 				if death_username is not None:
+					print line
 					if death_username in users:
 						death_user = users[death_username]
 						death_user._death_count += 1
