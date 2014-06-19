@@ -79,6 +79,11 @@ REGEX_DEATH_MESSAGES = set()
 for message in DEATH_MESSAGES:
 	REGEX_DEATH_MESSAGES.add(re.compile("\Server thread\/INFO\]: ([^ ]+) (" + message + ")"))
 
+def capitalize_first(str):
+	if not len(str):
+		return ""
+	return str[:1].upper() + str[1:]
+
 class UserStats:
 	def __init__(self, username=""):
 		self._username = username
@@ -92,7 +97,7 @@ class UserStats:
 		self._longest_session = datetime.timedelta()
 
 		self._death_count = 0
-		self._death_types = set()
+		self._death_types = {}
 
 		self._messages = 0
 
@@ -156,7 +161,7 @@ class UserStats:
 
 	@property
 	def death_types(self):
-		return self._death_types
+		return self._death_types.items()
 
 
 class ServerStats:
@@ -228,7 +233,7 @@ def grep_death(line):
 	for regex in REGEX_DEATH_MESSAGES:
 		search = regex.search(line)
 		if search:
-			return search.group(1), search.group(2)
+			return search.group(1), capitalize_first(search.group(2))
 	return None, None
 
 def format_delta(timedelta, days=True, maybe_years=False):
@@ -334,7 +339,8 @@ def parse_logs(logdir, since=None, whitelist_users=None):
 						death_user = users[death_username]
 						death_user._death_count += 1
 						if death_type not in death_user._death_types:
-							death_user._death_types.add(death_type)
+							death_user._death_types[death_type] = 0
+						death_user._death_types[death_type] += 1
 				else:
 					search = REGEX_CHAT_USERNAME.search(line)
 					if not search:

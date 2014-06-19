@@ -52,10 +52,7 @@
 			});
 
 			$("#page-server").hide();
-
-			{% for user in users %}
-			$("#page-{{ user.username }}").hide();
-			{% endfor %}
+			$(".userpage").hide();
 
 			$(".js-link").each(function() {
 				$(this).click(function() {
@@ -66,8 +63,8 @@
 				});
 			});
 
-            $("#stats").tablesorter();
-            $("#stats").bind("sortEnd", addPlaces);
+			$("#stats").tablesorter();
+			$("#stats").bind("sortEnd", addPlaces);
 		});
 		</script>
 	</head>
@@ -132,82 +129,93 @@
 			</div>
 			<div id="page-server" class="page row-fluid">
 				<table class="table table-striped table-bordered">
-				    <tr>
-				        <th>Statistics since:</th>
-				        <td>{{ server.statistics_since }}</td>
-				    </tr>
-				    <tr>
-				        <th>Time played by all players:</th>
-				        <td>{{ server.time_played }}</td>
-				    </tr>
-				    <tr>
-				        <th>Total players:</th>
-				        <td>{{ users|length }}</td>
-				    </tr>
-				    <tr>
-				        <th>Maximum online players:</th>
-				        <td>{{ server.max_players }} ({{ server.max_players_date }})</td>
-				    </tr>
+					<tr>
+						<th>Statistics since:</th>
+						<td>{{ server.statistics_since }}</td>
+					</tr>
+					<tr>
+						<th>Time played by all players:</th>
+						<td>{{ server.time_played }}</td>
+					</tr>
+					<tr>
+						<th>Total players:</th>
+						<td>{{ users|length }}</td>
+					</tr>
+					<tr>
+						<th>Maximum online players:</th>
+						<td>{{ server.max_players }} ({{ server.max_players_date }})</td>
+					</tr>
 				</table>
 			</div>
 			{% for user in users %}
-			<div id="page-{{ user.username }}" class="page row-fluid">
+			<div id="page-{{ user.username }}" class="page userpage row-fluid">
 				<h4>Player Statistics for {{user.username }}</h4>
 				<table class="table table-striped table-bordered">
-				    <tr>
-				        <th>Time Played:</th>
-				        <td>{{ user.time }}</td>
-				    </tr>
-				    <tr>
-				        <th>Logins:</th>
-				        <td>{{ user.logins }}</td>
-				    </tr>
-				    <tr>
-				        <th>Time per Login:</th>
-				        <td>{{ user.time_per_login }}</td>
-				    </tr>
-				    <tr>
-				        <th>First Login:</th>
-				        <td>{{ user.first_login }}</td>
-				    </tr>
-				    <tr>
-				        <th>Last Login:</th>
-				        <td>{{ user.last_login }}</td>
-				    </tr>
-				    <tr>
-				        <th>Longest Session:</th>
-				        <td>{{ user.longest_session }}</td>
-				    </tr>
-				    <tr>
-				        <th>Active Days:</th>
-				        <td>{{ user.active_days }}</td>
-				    </tr>
-				    <tr>
-				        <th>Time per Day:</th>
-				        <td>{{ user.time_per_active_day }}</td>
-				    </tr>
-				    <tr>
-				        <th>Messages Sent:</th>
-				        <td>{{ user.messages }}</td>
-				    </tr>
-				    <tr>
-				        <th>Time per Message:</th>
-				        <td>{{ user.time_per_message }}</td>
-				    </tr>
-				    <tr>
-				        <th>Deaths:</th>
-				        <td>{{ user.death_count }}</td>
-				    </tr>
-				    <tr>
-				        <th>Types of Deaths:</th>
-				        <td></td>
-				    </tr>
-				{% for death in user.death_types %}
-				    <tr>
-				        <th></th>
-				        <td>{{ death }}</td>
-				    </tr>
-				{% endfor %}
+					<tr>
+						<th>Time Played:</th>
+						<td>{{ user.time }}</td>
+					</tr>
+					<tr>
+						<th>Logins:</th>
+						<td>{{ user.logins }}</td>
+					</tr>
+					<tr>
+						<th>Time per Login:</th>
+						<td>{{ user.time_per_login }}</td>
+					</tr>
+					<tr>
+						<th>First Login:</th>
+						<td>{{ user.first_login }}</td>
+					</tr>
+					<tr>
+						<th>Last Login:</th>
+						<td>{{ user.last_login }}</td>
+					</tr>
+					<tr>
+						<th>Longest Session:</th>
+						<td>{{ user.longest_session }}</td>
+					</tr>
+					<tr>
+						<th>Active Days:</th>
+						<td>{{ user.active_days }}</td>
+					</tr>
+					<tr>
+						<th>Time per Day:</th>
+						<td>{{ user.time_per_active_day }}</td>
+					</tr>
+					<tr>
+						<th>Messages Sent:</th>
+						<td>{{ user.messages }}</td>
+					</tr>
+					<tr>
+						<th>Time per Message:</th>
+						<td>{{ user.time_per_message }}</td>
+					</tr>
+					<tr>
+						<th>Deaths:</th>
+						<td>{{ user.death_count }}</td>
+					</tr>
+					{% if user.death_count > 0 %}
+					<tr>
+						<th>Types of Deaths:</th>
+						<td>
+							<table class="table table-striped table-bordered">
+								<thead>
+									<tr>
+										<th>Count</th>
+										<th>Type of Death</th>
+									</tr>
+								</thead>
+								{% for death, count in user.death_types %}
+								<tr>
+									<td>{{ count }}</td>
+									<td>{{ death }}</td>
+								</tr>
+								{% endfor %}
+							</table>
+						</td>
+					</tr>
+					{% endif %}
 				</table>
 			</div>
 			{% endfor %}
