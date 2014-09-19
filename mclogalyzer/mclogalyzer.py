@@ -368,9 +368,14 @@ def main():
 	parser.add_argument("-t", "--template",
 					help="the template to generate the output file",
 					metavar="template")
-	parser.add_argument("--since",
+	group = parser.add_mutually_exclusive_group()
+	group.add_argument("--since",
 					help="ignores the log before this date, must be in format year-month-day hour:minute:second",
 					metavar="<datetime>")
+	group.add_argument("--month",
+                action='store_true', help="create report of last month")
+	group.add_argument("--week",
+                action='store_true', help="create report of last week")
 	parser.add_argument("-w", "--whitelist",
 					help="the whitelist of the server (only use included usernames)",
 					metavar="<whitelist>")
