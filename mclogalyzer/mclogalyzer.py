@@ -67,6 +67,7 @@ DEATH_MESSAGES = (
 	"got finished off by.*",
 	"tried to swim in lava.*",
 	"died",
+	"was struck by lighting",
 	"starved to death",
 	"suffocated in a wall",
 	"was pummeled by.*",
