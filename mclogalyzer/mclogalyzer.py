@@ -388,7 +388,11 @@ def main():
 	args = vars(parser.parse_args())
 
 	since = None
-	if args["since"] is not None:
+	if args['month']:
+		since = datetime.datetime.now() - datetime.timedelta(days=30)
+	elif args['week']:
+		since = datetime.datetime.now() - datetime.timedelta(days=7)
+	elif args["since"] is not None:
 		try:
 			d = time.strptime(args["since"], "%Y-%m-%d %H:%M:%S")
 		except ValueError:
