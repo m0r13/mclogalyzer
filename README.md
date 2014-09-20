@@ -41,7 +41,8 @@ template file by specifying the option `-t template.html` or
 You can also skip a part of the log file by specifying a time where the script
 should start analyzing. To do this use the `--since` parameter. You have to
 specify the time in the format `year-month-day hour:minute:second`, for example
-`--since="2013-05-16 00:00:00"`.
+`--since="2013-05-16 00:00:00"`. Or, you can simply use `--month` or `--week` 
+to generate the report of last month or last week.
 
 You can use the whitelist as a guide using `--w whitelist.json`. If so, users
 not included in the whitelist will be removed from final results, and users not
