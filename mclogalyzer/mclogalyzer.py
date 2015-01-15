@@ -36,6 +36,7 @@ REGEX_LOGOUT_USERNAME = re.compile("\[Server thread\/INFO\]: ([^ ]+) lost connec
 REGEX_LOGOUT_USERNAME2 = re.compile(
     "\[Server thread\/INFO\]:.*GameProfile.*name='?([^ ,']+)'?.* lost connection")
 REGEX_KICK_USERNAME = re.compile("\[INFO\] CONSOLE: Kicked player ([^ ]*)")
+REGEX_ACHIEVEMENT = re.compile("\[Server thread\/INFO\]: ([^ ]+) has just earned the achievement \[(.*)\]")
 
 # regular expression to get the username of a chat message
 # you need to change this if you have special chat prefixes or stuff like that
@@ -82,6 +83,9 @@ REGEX_DEATH_MESSAGES = set()
 for message in DEATH_MESSAGES:
     REGEX_DEATH_MESSAGES.add(re.compile("\Server thread\/INFO\]: ([^ ]+) (" + message + ")"))
 
+# Will have to update this when number of achievements change.
+# Got this value from http://minecraft.gamepedia.com/Achievements
+ACHIEVEMENTS_AVAILABLE = 34
 
 def capitalize_first(str):
     if not len(str):
@@ -105,6 +109,9 @@ class UserStats:
         self._death_types = {}
 
         self._messages = 0
+
+        self._achievement_count = 0
+        self._achievements = []
 
     def handle_logout(self, date):
         if self._prev_login is None:
@@ -171,6 +178,13 @@ class UserStats:
     def death_types(self):
         return sorted(self._death_types.items(), key=lambda k: k[1])
 
+    @property
+    def achievement_count(self):
+        return self._achievement_count
+
+    @property
+    def achievements(self):
+        return sorted(self._achievements)
 
 class ServerStats:
     def __init__(self):
@@ -249,6 +263,15 @@ def grep_death(line):
         if search:
             return search.group(1), capitalize_first(search.group(2))
     return None, None
+
+
+def grep_achievement(line):
+    search = REGEX_ACHIEVEMENT.search(line)
+    if not search:
+        print "### Warning: Unable to find achievement username or achievement:", line
+        return None, None
+    username = search.group(1)
+    return username.decode("ascii", "ignore").encode("ascii", "ignore"), search.group(2)
 
 
 def format_delta(timedelta, days=True, maybe_years=False):
@@ -349,6 +372,13 @@ def parse_logs(logdir, since=None, whitelist_users=None):
                     user.handle_logout(date)
                 online_players = set()
 
+            elif "earned the achievement" in line:
+                achievement_username, achievement = grep_achievement(line)
+                if achievement_username is not None:
+                    if achievement_username in users:
+                        achievement_user = users[achievement_username]
+                        achievement_user._achievement_count += 1
+                        achievement_user._achievements.append(achievement)
             else:
                 death_username, death_type = grep_death(line)
                 if death_username is not None:
@@ -439,6 +469,7 @@ def main():
     f = open(args["output"], "w")
     f.write(template.render(users=users,
                             server=server,
+                            achievements_available=ACHIEVEMENTS_AVAILABLE,
                             last_update=time.strftime("%Y-%m-%d %H:%M:%S")))
     f.close()
 
