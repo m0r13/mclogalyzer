@@ -30,8 +30,45 @@
 				$(this).text((index+1) + ".");
 			});
 		}
+		
+		var currentPage = "";
+		function goToPage(page) {
+			// make sure this page exists
+			if ($("#" + page).length == 0)
+				return false;
+			// make sure we set this page only once (recursion because of changing hash)
+			if (currentPage == page)
+				return true;
+			currentPage = page;
+			window.location.hash = "#" + page.replace(/^page-/, "");
+			
+			// hide all pages except this one
+			$(".page").hide();
+			$("#" + page).show();
+
+			// update the active/inactive links in the nav bar
+			$(".js-link").parent().filter("li").removeClass("active");
+			$(".js-link[data-page='" + page + "']").parent().filter("li").addClass("active");
+			return true;
+		}
 
 		$(document).ready(function() {
+			goToPage("page-players");
+			var page = window.location.hash.substring(1);
+			if (page.length != 0)
+				goToPage("page-" + page);
+
+			$(".js-link").each(function() {
+				$(this).click(function() {
+					goToPage($(this).data("page"));
+				});
+			});
+			
+			$(window).bind("hashchange", function() {
+				if (!goToPage("page-" + window.location.hash.substr(1)))
+					goToPage("page-players");
+			});
+			
 			addPlaces();
 
 			columns.forEach(function(value, index, array) {
@@ -52,18 +89,6 @@
 				$("#column-select").append(label);
 			});
 
-			$("#page-server").hide();
-			$(".userpage").hide();
-
-			$(".js-link").each(function() {
-				$(this).click(function() {
-					$(".page").hide();
-					$(".nav li").removeClass("active");
-					$("#" + $(this).data("page")).show();
-					$(this).parent().addClass("active");
-				});
-			});
-
 			$("#stats").tablesorter();
 			$("#stats").bind("sortEnd", addPlaces);
 		});
@@ -74,10 +99,10 @@
 		<div class="container-fluid">
 			<div class="navbar navbar-inverse">
 				<div class="navbar-inner">
-					<a class="brand" href="#">Minecraft Server Log Statistics</a>
+					<a class="brand" href="#players">Minecraft Server Log Statistics</a>
 					<ul class="nav">
-						<li class="active"><a class="js-link" data-page="page-players" href="#">Players</a></li>
-						<li><a class="js-link" data-page="page-server" href="#">Server</a></li>
+						<li class="active"><a class="js-link" data-page="page-players" href="#players">Players</a></li>
+						<li><a class="js-link" data-page="page-server" href="#server">Server</a></li>
 					</ul>
 					<p class="navbar-text pull-right">Last update: {{ last_update }}</p>
 				</div>
@@ -111,7 +136,7 @@
 							{% for user in users %}
 							<tr>
 								<td class="c-place"></td>
-								<td><a class="js-link" data-page="page-{{ user.username }}" href="#">{{ user.username }}</a></td>
+								<td><a class="js-link" data-page="page-players-{{ user.username }}" href="#players-{{ user.username }}">{{ user.username }}</a></td>
 								<td class="col c-time-played">{{ user.time }}</td>
 								<td class="col c-logins">{{ user.logins }}</td>
 								<td class="col c-login-time">{{ user.time_per_login }}</td>
@@ -151,7 +176,7 @@
 				</table>
 			</div>
 			{% for user in users %}
-			<div id="page-{{ user.username }}" class="page userpage row-fluid">
+			<div id="page-players-{{ user.username }}" class="page page-player row-fluid">
 				<h4>Player Statistics for {{user.username }}</h4>
 				<table class="table table-striped table-bordered">
 					<tr>
