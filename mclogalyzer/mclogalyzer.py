@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-# Copyright 2013 Moritz Hilscher
+# Copyright 2013-2015 Moritz Hilscher
 #
 #  This file is part of mclogalyzer.
 #
@@ -20,11 +20,11 @@
 import argparse
 import datetime
 import gzip
+import json
 import os
 import re
 import sys
 import time
-import json
 
 import jinja2
 
