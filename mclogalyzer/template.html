@@ -18,6 +18,7 @@
 			[".c-last-login", "Last login", false],
 			[".c-longest-session", "Longest session", false],
 			[".c-deaths", "Deaths", false],
+            [".c-achievements", "Achievements", false],
 			[".c-active-days", "Active days", false],
 			[".c-active-day-time", "Time per day", false],
 			[".c-messages", "Messages sent", false],
@@ -99,6 +100,7 @@
 								<th class="col c-last-login">Last login</th>
 								<th class="col c-longest-session">Longest session</th>
 								<th class="col c-deaths">Deaths</th>
+								<th class="col c-achievements">Achievements</th>
 								<th class="col c-active-days">Active days</th>
 								<th class="col c-active-day-time">Time per day</th>
 								<th class="col c-messages">Messages sent</th>
@@ -117,6 +119,7 @@
 								<td class="col c-last-login">{{ user.last_login }}</td>
 								<td class="col c-longest-session">{{ user.longest_session }}</td>
 								<td class="col c-deaths">{{ user.death_count }}</td>
+								<td class="col c-achievements">{{ user.achievement_count }}</td>
 								<td class="col c-active-days">{{ user.active_days }}</td>
 								<td class="col c-active-day-time">{{ user.time_per_active_day }}</td>
 								<td class="col c-messages">{{ user.messages }}</td>
@@ -214,6 +217,20 @@
 						</td>
 					</tr>
 					{% endif %}
+                    <tr>
+						<th>Achievements:</th>
+						<td>{{ user.achievement_count }} of {{ achievements_available }}</td>
+					</tr>
+                    {% if user.achievement_count > 0 %}
+                    <tr>
+						<th><a href="http://minecraft.gamepedia.com/Achievements">Achievements ... achieved:</th>
+						<td><ul>
+                            {% for a in user.achievements %}
+                                <li>{{ a }}</li>
+                            {% endfor %}
+                        </ul></td>
+					</tr>
+                    {% endif %}
 				</table>
 			</div>
 			{% endfor %}
