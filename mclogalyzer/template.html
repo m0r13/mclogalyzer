@@ -9,6 +9,10 @@
 		#player-stats td, #player-stats th {
 			vertical-align: middle !important;
 		}
+		
+		.avatar {
+			margin-right: 8px;
+		}
 		</style>
 
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
@@ -125,8 +129,7 @@
 					<table id="player-stats" class="table table-striped table-bordered tablesorter">
 						<thead>
 							<tr>
-								<!--<th>#</th>-->
-								<td></td>
+								<th>#</th>
 								<th>Username</th>
 								<th class="col c-time-played">Time played</th>
 								<th class="col c-logins">Logins</th>
@@ -145,9 +148,12 @@
 						<tbody>
 							{% for user in users %}
 							<tr>
-								<!--<td class="c-place"></td>-->
-								<td style="width: 32px"><img src="http://achievecraft.com/tools/avatar/32/{{ user.username }}.png" /></td>
-								<td><a class="js-link" data-page="page-players-{{ user.username }}" href="#players-{{ user.username }}">{{ user.username }}</a></td>
+								<td class="c-place"></td>
+								<td>
+									<a class="js-link" data-page="page-players-{{ user.username }}" href="#players-{{ user.username }}">
+										<img class="avatar" src="http://achievecraft.com/tools/avatar/32/{{ user.username }}.png" />{{ user.username }}
+									</a>
+								</td>
 								<td class="col c-time-played">{{ user.time }}</td>
 								<td class="col c-logins">{{ user.logins }}</td>
 								<td class="col c-login-time">{{ user.time_per_login }}</td>
