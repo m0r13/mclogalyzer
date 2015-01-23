@@ -53,17 +53,21 @@
 		}
 
 		$(document).ready(function() {
-			goToPage("page-players");
+			// try to go to page in the supplied url hash
+			// first try players page in case of that supplied page doesn't exist
 			var page = window.location.hash.substring(1);
+			goToPage("page-players");
 			if (page.length != 0)
 				goToPage("page-" + page);
 
+			// handler for links to pages
 			$(".js-link").each(function() {
 				$(this).click(function() {
 					goToPage($(this).data("page"));
 				});
 			});
 			
+			// handler for url hash hange to update page
 			$(window).bind("hashchange", function() {
 				if (!goToPage("page-" + window.location.hash.substr(1)))
 					goToPage("page-players");
