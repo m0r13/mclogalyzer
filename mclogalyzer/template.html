@@ -18,7 +18,7 @@
 			[".c-last-login", "Last login", false],
 			[".c-longest-session", "Longest session", false],
 			[".c-deaths", "Deaths", false],
-            [".c-achievements", "Achievements", false],
+			[".c-achievements", "Achievements", false],
 			[".c-active-days", "Active days", false],
 			[".c-active-day-time", "Time per day", false],
 			[".c-messages", "Messages sent", false],
@@ -242,20 +242,20 @@
 						</td>
 					</tr>
 					{% endif %}
-                    <tr>
+					<tr>
 						<th>Achievements:</th>
 						<td>{{ user.achievement_count }} of {{ achievements_available }}</td>
 					</tr>
-                    {% if user.achievement_count > 0 %}
-                    <tr>
+					{% if user.achievement_count > 0 %}
+					<tr>
 						<th><a href="http://minecraft.gamepedia.com/Achievements">Achievements ... achieved:</th>
 						<td><ul>
-                            {% for a in user.achievements %}
-                                <li>{{ a }}</li>
-                            {% endfor %}
-                        </ul></td>
+							{% for a in user.achievements %}
+								<li>{{ a }}</li>
+							{% endfor %}
+						</ul></td>
 					</tr>
-                    {% endif %}
+					{% endif %}
 				</table>
 			</div>
 			{% endfor %}
