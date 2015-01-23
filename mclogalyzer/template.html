@@ -11,6 +11,8 @@
 		}
 		
 		.avatar {
+			width: 32px;
+			height: 32px;
 			margin-right: 8px;
 		}
 		</style>
@@ -194,86 +196,91 @@
 			</div>
 			{% for user in users %}
 			<div id="page-players-{{ user.username }}" class="page page-player row-fluid">
-				<h4>Player Statistics for {{user.username }}</h4>
-				<table class="table table-striped table-bordered">
-					<tr>
-						<th>Time Played:</th>
-						<td>{{ user.time }}</td>
-					</tr>
-					<tr>
-						<th>Logins:</th>
-						<td>{{ user.logins }}</td>
-					</tr>
-					<tr>
-						<th>Time per Login:</th>
-						<td>{{ user.time_per_login }}</td>
-					</tr>
-					<tr>
-						<th>First Login:</th>
-						<td>{{ user.first_login }}</td>
-					</tr>
-					<tr>
-						<th>Last Login:</th>
-						<td>{{ user.last_login }}</td>
-					</tr>
-					<tr>
-						<th>Longest Session:</th>
-						<td>{{ user.longest_session }}</td>
-					</tr>
-					<tr>
-						<th>Active Days:</th>
-						<td>{{ user.active_days }}</td>
-					</tr>
-					<tr>
-						<th>Time per Day:</th>
-						<td>{{ user.time_per_active_day }}</td>
-					</tr>
-					<tr>
-						<th>Messages Sent:</th>
-						<td>{{ user.messages }}</td>
-					</tr>
-					<tr>
-						<th>Time per Message:</th>
-						<td>{{ user.time_per_message }}</td>
-					</tr>
-					<tr>
-						<th>Deaths:</th>
-						<td>{{ user.death_count }}</td>
-					</tr>
-					{% if user.death_count > 0 %}
-					<tr>
-						<th>Types of Deaths:</th>
-						<td>
-							<table class="table table-striped table-bordered">
-								<tr>
-									<th>Count</th>
-									<th>Type of Death</th>
-								</tr>
-								{% for death, count in user.death_types %}
-								<tr>
-									<td>{{ count }}</td>
-									<td>{{ death }}</td>
-								</tr>
+				<div class="span8">
+					<h4>Player Statistics for {{user.username }}</h4>
+					<table class="table table-striped table-bordered">
+						<tr>
+							<th>Time Played:</th>
+							<td>{{ user.time }}</td>
+						</tr>
+						<tr>
+							<th>Logins:</th>
+							<td>{{ user.logins }}</td>
+						</tr>
+						<tr>
+							<th>Time per Login:</th>
+							<td>{{ user.time_per_login }}</td>
+						</tr>
+						<tr>
+							<th>First Login:</th>
+							<td>{{ user.first_login }}</td>
+						</tr>
+						<tr>
+							<th>Last Login:</th>
+							<td>{{ user.last_login }}</td>
+						</tr>
+						<tr>
+							<th>Longest Session:</th>
+							<td>{{ user.longest_session }}</td>
+						</tr>
+						<tr>
+							<th>Active Days:</th>
+							<td>{{ user.active_days }}</td>
+						</tr>
+						<tr>
+							<th>Time per Day:</th>
+							<td>{{ user.time_per_active_day }}</td>
+						</tr>
+						<tr>
+							<th>Messages Sent:</th>
+							<td>{{ user.messages }}</td>
+						</tr>
+						<tr>
+							<th>Time per Message:</th>
+							<td>{{ user.time_per_message }}</td>
+						</tr>
+						<tr>
+							<th>Deaths:</th>
+							<td>{{ user.death_count }}</td>
+						</tr>
+						{% if user.death_count > 0 %}
+						<tr>
+							<th>Types of Deaths:</th>
+							<td>
+								<table class="table table-striped table-bordered">
+									<tr>
+										<th>Count</th>
+										<th>Type of Death</th>
+									</tr>
+									{% for death, count in user.death_types %}
+									<tr>
+										<td>{{ count }}</td>
+										<td>{{ death }}</td>
+									</tr>
+									{% endfor %}
+								</table>
+							</td>
+						</tr>
+						{% endif %}
+						<tr>
+							<th>Achievements:</th>
+							<td>{{ user.achievement_count }} of {{ achievements_available }}</td>
+						</tr>
+						{% if user.achievement_count > 0 %}
+						<tr>
+							<th><a href="http://minecraft.gamepedia.com/Achievements">Achievements ... achieved:</th>
+							<td><ul>
+								{% for a in user.achievements %}
+									<li>{{ a }}</li>
 								{% endfor %}
-							</table>
-						</td>
-					</tr>
-					{% endif %}
-					<tr>
-						<th>Achievements:</th>
-						<td>{{ user.achievement_count }} of {{ achievements_available }}</td>
-					</tr>
-					{% if user.achievement_count > 0 %}
-					<tr>
-						<th><a href="http://minecraft.gamepedia.com/Achievements">Achievements ... achieved:</th>
-						<td><ul>
-							{% for a in user.achievements %}
-								<li>{{ a }}</li>
-							{% endfor %}
-						</ul></td>
-					</tr>
-					{% endif %}
-				</table>
+							</ul></td>
+						</tr>
+						{% endif %}
+					</table>
+				</div>
+				<div class="span4" style="text-align: center">
+					<img style="margin-top: 100px" src="http://achievecraft.com/tools/skin/256/{{ user.username }}.png" />
+				</div>
 			</div>
 			{% endfor %}
 		</div>
