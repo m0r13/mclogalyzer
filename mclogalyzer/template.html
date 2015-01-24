@@ -3,8 +3,20 @@
 	<head>
 		<title>Minecraft Server Log Statistics</title>
 
-		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css">
+		<!--  jQuery -->
+		<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+		
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+		<!-- Optional theme -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+		
+		<!-- jQuery tablesorter plugin -->
+		<script type="text/javascript" src="http://cdn.ucb.org.br/Scripts/tablesorter/jquery.tablesorter.min.js"></script>
 		<link rel="stylesheet" href="http://cdn.jsdelivr.net/tablesorter/2.0.5b/addons/pager/jquery.tablesorter.pager.css">
+		
 		<style type="text/css">
 		#player-stats td, #player-stats th {
 			vertical-align: middle !important;
@@ -16,10 +28,6 @@
 			margin-right: 8px;
 		}
 		</style>
-
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-		<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="http://cdn.ucb.org.br/Scripts/tablesorter/jquery.tablesorter.min.js"></script>
 		<script>
 		var columns = [
 			[".c-time-played", "Time played", true],
@@ -111,23 +119,30 @@
 	</head>
 
 	<body>
-		<div class="container-fluid">
-			<div class="navbar navbar-inverse">
-				<div class="navbar-inner">
-					<a class="brand" href="#players">Minecraft Server Log Statistics</a>
-					<ul class="nav">
+		<nav class="navbar navbar-inverse">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="#players">Minecraft Server Log Statistics</a>
+				</div>
+				
+				<div class="collapse navbar-collapse">
+					<ul class="nav navbar-nav">
 						<li class="active"><a class="js-link" data-page="page-players" href="#players">Players</a></li>
 						<li><a class="js-link" data-page="page-server" href="#server">Server</a></li>
 					</ul>
-					<p class="navbar-text pull-right">Last update: {{ last_update }}</p>
+					<ul class="nav navbar-nav navbar-right">
+						<li><span class="navbar-text navbar-right">Last update: {{ last_update }}</span></li>
+					</ul>
 				</div>
 			</div>
+		</nav>
+		<div class="container-fluid">
 			<div id="page-players" class="page row-fluid">
-				<div id="column-select" class="span2">
+				<div id="column-select" class="col-md-2">
 					<h4>Columns</h4>
 				</div>
 
-				<div class="span10">
+				<div class="col-md-10">
 					<table id="player-stats" class="table table-striped table-bordered tablesorter">
 						<thead>
 							<tr>
@@ -196,7 +211,7 @@
 			</div>
 			{% for user in users %}
 			<div id="page-players-{{ user.username }}" class="page page-player row-fluid">
-				<div class="span8">
+				<div class="col-md-8">
 					<h4>Player Statistics for {{user.username }}</h4>
 					<table class="table table-striped table-bordered">
 						<tr>
@@ -278,7 +293,7 @@
 						{% endif %}
 					</table>
 				</div>
-				<div class="span4" style="text-align: center">
+				<div class="col-md-4" style="text-align: center">
 					<img style="margin-top: 100px" src="http://avatars.mapcrafter.org/body/{{ user.username }}/8" />
 				</div>
 			</div>
