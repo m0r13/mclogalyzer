@@ -3,6 +3,12 @@
 This is a small Python script to analyze your Minecraft server log file and to
 generate some nice statistics as HTML-File.
 
+<div align="center">
+    <a href="http://mclogalyzer.mapcrafter.org/example"><img src="http://i.imgur.com/GkKY9T6.png" /></a>
+</div>
+
+Above you can see an [example](http://mclogalyzer.mapcrafter.org/example) of MCLogalyzer.
+
 MCLogalyzer is free software and available under the GPL license.
 
 ## Installation ##
