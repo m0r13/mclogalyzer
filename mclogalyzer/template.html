@@ -122,11 +122,16 @@
 	<body>
 		<nav class="navbar navbar-inverse">
 			<div class="container">
-				<div class="navbar-header">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
 					<a class="navbar-brand" href="#players">Minecraft Server Log Statistics</a>
 				</div>
-				
-				<div class="collapse navbar-collapse">
+				<div id="navbar" class="navbar-collapse collapse">
 					<ul class="nav navbar-nav">
 						<li class="active"><a class="js-link" data-page="page-players" href="#players">Players</a></li>
 						<li><a class="js-link" data-page="page-server" href="#server">Server</a></li>
