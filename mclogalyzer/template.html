@@ -37,11 +37,12 @@
 			[".c-last-login", "Last login", false],
 			[".c-longest-session", "Longest session", false],
 			[".c-deaths", "Deaths", false],
+            [".c-ragequits", "Rage quits", false],
 			[".c-achievements", "Achievements", false],
 			[".c-active-days", "Active days", false],
 			[".c-active-day-time", "Time per day", false],
 			[".c-messages", "Messages sent", false],
-			[".c-message-time", "Time per message", false],
+			[".c-message-time", "Time per message", false]
 		];
 
 		function addPlaces() {
@@ -155,6 +156,7 @@
 								<th class="col c-last-login">Last login</th>
 								<th class="col c-longest-session">Longest session</th>
 								<th class="col c-deaths">Deaths</th>
+                                <th class="col c-ragequits">Rage quits</th>
 								<th class="col c-achievements">Achievements</th>
 								<th class="col c-active-days">Active days</th>
 								<th class="col c-active-day-time">Time per day</th>
@@ -178,6 +180,7 @@
 								<td class="col c-last-login">{{ user.last_login }}</td>
 								<td class="col c-longest-session">{{ user.longest_session }}</td>
 								<td class="col c-deaths">{{ user.death_count }}</td>
+                                <td class="col c-ragequits">{{ user.ragequit_count }}</td>
 								<td class="col c-achievements">{{ user.achievement_count }}</td>
 								<td class="col c-active-days">{{ user.active_days }}</td>
 								<td class="col c-active-day-time">{{ user.time_per_active_day }}</td>
@@ -277,6 +280,10 @@
 							</td>
 						</tr>
 						{% endif %}
+                        <tr>
+                            <th>Rage quits:</th>
+                            <td>{{ user.ragequit_count}}</td>
+                        </tr>
 						<tr>
 							<th>Achievements:</th>
 							<td>{{ user.achievement_count }} of {{ achievements_available }}</td>
