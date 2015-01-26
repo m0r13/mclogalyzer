@@ -121,7 +121,7 @@
 
 	<body>
 		<nav class="navbar navbar-inverse">
-			<div class="container-fluid">
+			<div class="container">
 				<div class="navbar-header">
 					<a class="navbar-brand" href="#players">Minecraft Server Log Statistics</a>
 				</div>
@@ -137,8 +137,8 @@
 				</div>
 			</div>
 		</nav>
-		<div class="container-fluid">
-			<div id="page-players" class="page row-fluid">
+		<div class="container">
+			<div id="page-players" class="page row">
 				<div id="column-select" class="col-md-2">
 					<h4>Columns</h4>
 				</div>
@@ -192,7 +192,7 @@
 					</table>
 				</div>
 			</div>
-			<div id="page-server" class="page row-fluid">
+			<div id="page-server" class="page row">
 				<table class="table table-striped table-bordered">
 					<tr>
 						<th>Statistics since:</th>
@@ -213,7 +213,7 @@
 				</table>
 			</div>
 			{% for user in users %}
-			<div id="page-players-{{ user.username }}" class="page page-player row-fluid">
+			<div id="page-players-{{ user.username }}" class="page page-player row">
 				<div class="col-md-8">
 					<h4>Player Statistics for {{user.username }}</h4>
 					<table class="table table-striped table-bordered">
