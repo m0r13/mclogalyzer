@@ -87,6 +87,9 @@ for message in DEATH_MESSAGES:
 # Got this value from http://minecraft.gamepedia.com/Achievements
 ACHIEVEMENTS_AVAILABLE = 34
 
+# Maximum duration, in seconds, that a logout can be considered a ragequit
+RAGEQUIT_MAX_ELAPSED_TIME = 45
+
 def capitalize_first(str):
     if not len(str):
         return ""
@@ -108,6 +111,10 @@ class UserStats:
         self._death_count = 0
         self._death_types = {}
 
+        # Rage quit tracking
+        self._last_death_time = None
+        self._ragequits = 0
+
         self._messages = 0
 
         self._achievement_count = 0
@@ -120,6 +127,16 @@ class UserStats:
         self._time += session
         self._longest_session = max(self._longest_session, session)
         self._prev_login = None
+        self.track_ragequits(date)
+
+
+    def track_ragequits(self, date):
+        if self._last_death_time:
+            elapsed_death_to_logout = (date - self._last_death_time).total_seconds()
+            if elapsed_death_to_logout <= RAGEQUIT_MAX_ELAPSED_TIME:
+                self._ragequits += 1
+
+        self._last_death_time = None
 
     @property
     def username(self):
@@ -185,6 +202,11 @@ class UserStats:
     @property
     def achievements(self):
         return sorted(self._achievements)
+
+    @property
+    def ragequit_count(self):
+        return self._ragequits
+
 
 class ServerStats:
     def __init__(self):
@@ -381,9 +403,11 @@ def parse_logs(logdir, since=None, whitelist_users=None):
                         achievement_user._achievements.append(achievement)
             else:
                 death_username, death_type = grep_death(line)
+                death_time = grep_log_datetime(today, line)
                 if death_username is not None:
                     if death_username in users:
                         death_user = users[death_username]
+                        death_user._last_death_time = death_time
                         death_user._death_count += 1
                         if death_type not in death_user._death_types:
                             death_user._death_types[death_type] = 0

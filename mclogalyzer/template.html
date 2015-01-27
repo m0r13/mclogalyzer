@@ -4,18 +4,18 @@
 		<title>Minecraft Server Log Statistics</title>
 
 		<!--  jQuery -->
-		<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+		<script type="text/javascript" src="//code.jquery.com/jquery-2.1.3.min.js"></script>
 		
 		<!-- Latest compiled and minified CSS -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 		<!-- Optional theme -->
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 		<!-- Latest compiled and minified JavaScript -->
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 		
 		<!-- jQuery tablesorter plugin -->
-		<script type="text/javascript" src="http://cdn.ucb.org.br/Scripts/tablesorter/jquery.tablesorter.min.js"></script>
-		<link rel="stylesheet" href="http://cdn.jsdelivr.net/tablesorter/2.0.5b/addons/pager/jquery.tablesorter.pager.css">
+        <script src="//cdn.jsdelivr.net/tablesorter/2.17.3/js/jquery.tablesorter.min.js"></script>
+		<link rel="stylesheet" href="//cdn.jsdelivr.net/tablesorter/2.17.3/addons/pager/jquery.tablesorter.pager.css">
 		
 		<style type="text/css">
 		#player-stats td, #player-stats th {
@@ -37,11 +37,12 @@
 			[".c-last-login", "Last login", false],
 			[".c-longest-session", "Longest session", false],
 			[".c-deaths", "Deaths", false],
+            [".c-ragequits", "Rage quits", false],
 			[".c-achievements", "Achievements", false],
 			[".c-active-days", "Active days", false],
 			[".c-active-day-time", "Time per day", false],
 			[".c-messages", "Messages sent", false],
-			[".c-message-time", "Time per message", false],
+			[".c-message-time", "Time per message", false]
 		];
 
 		function addPlaces() {
@@ -120,12 +121,17 @@
 
 	<body>
 		<nav class="navbar navbar-inverse">
-			<div class="container-fluid">
-				<div class="navbar-header">
+			<div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
 					<a class="navbar-brand" href="#players">Minecraft Server Log Statistics</a>
 				</div>
-				
-				<div class="collapse navbar-collapse">
+				<div id="navbar" class="navbar-collapse collapse">
 					<ul class="nav navbar-nav">
 						<li class="active"><a class="js-link" data-page="page-players" href="#players">Players</a></li>
 						<li><a class="js-link" data-page="page-server" href="#server">Server</a></li>
@@ -136,8 +142,8 @@
 				</div>
 			</div>
 		</nav>
-		<div class="container-fluid">
-			<div id="page-players" class="page row-fluid">
+		<div class="container">
+			<div id="page-players" class="page row">
 				<div id="column-select" class="col-md-2">
 					<h4>Columns</h4>
 				</div>
@@ -155,6 +161,7 @@
 								<th class="col c-last-login">Last login</th>
 								<th class="col c-longest-session">Longest session</th>
 								<th class="col c-deaths">Deaths</th>
+                                <th class="col c-ragequits">Rage quits</th>
 								<th class="col c-achievements">Achievements</th>
 								<th class="col c-active-days">Active days</th>
 								<th class="col c-active-day-time">Time per day</th>
@@ -178,6 +185,7 @@
 								<td class="col c-last-login">{{ user.last_login }}</td>
 								<td class="col c-longest-session">{{ user.longest_session }}</td>
 								<td class="col c-deaths">{{ user.death_count }}</td>
+                                <td class="col c-ragequits">{{ user.ragequit_count }}</td>
 								<td class="col c-achievements">{{ user.achievement_count }}</td>
 								<td class="col c-active-days">{{ user.active_days }}</td>
 								<td class="col c-active-day-time">{{ user.time_per_active_day }}</td>
@@ -189,7 +197,7 @@
 					</table>
 				</div>
 			</div>
-			<div id="page-server" class="page row-fluid">
+			<div id="page-server" class="page row">
 				<table class="table table-striped table-bordered">
 					<tr>
 						<th>Statistics since:</th>
@@ -210,7 +218,7 @@
 				</table>
 			</div>
 			{% for user in users %}
-			<div id="page-players-{{ user.username }}" class="page page-player row-fluid">
+			<div id="page-players-{{ user.username }}" class="page page-player row">
 				<div class="col-md-8">
 					<h4>Player Statistics for {{user.username }}</h4>
 					<table class="table table-striped table-bordered">
@@ -277,6 +285,10 @@
 							</td>
 						</tr>
 						{% endif %}
+                        <tr>
+                            <th>Rage quits:</th>
+                            <td>{{ user.ragequit_count}}</td>
+                        </tr>
 						<tr>
 							<th>Achievements:</th>
 							<td>{{ user.achievement_count }} of {{ achievements_available }}</td>
