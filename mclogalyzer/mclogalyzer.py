@@ -385,7 +385,7 @@ def parse_logs(logdir, since=None, whitelist_users=None):
                 if username in online_players:
                     online_players.remove(username)
 
-            elif "[INFO] Stopping server" in line:
+            elif "Stopping server" in line or "forcibly shutdown" in line or "Starting minecraft server" in line:
                 date = grep_log_datetime(today, line)
                 if date is None or (since is not None and date < since):
                     continue
