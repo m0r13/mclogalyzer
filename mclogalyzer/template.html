@@ -14,7 +14,7 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 		
 		<!-- jQuery tablesorter plugin -->
-        <script src="https://cdn.jsdelivr.net/tablesorter/2.17.3/js/jquery.tablesorter.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/tablesorter/2.17.3/js/jquery.tablesorter.min.js"></script>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/tablesorter/2.17.3/addons/pager/jquery.tablesorter.pager.css">
 		
 		<style type="text/css">
@@ -37,7 +37,7 @@
 			[".c-last-login", "Last login", false],
 			[".c-longest-session", "Longest session", false],
 			[".c-deaths", "Deaths", false],
-            [".c-ragequits", "Rage quits", false],
+			[".c-ragequits", "Rage quits", false],
 			[".c-achievements", "Achievements", false],
 			[".c-active-days", "Active days", false],
 			[".c-active-day-time", "Time per day", false],
@@ -122,7 +122,7 @@
 	<body>
 		<nav class="navbar navbar-inverse">
 			<div class="container">
-                <div class="navbar-header">
+			<div class="navbar-header">
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
@@ -134,7 +134,8 @@
 				<div id="navbar" class="navbar-collapse collapse">
 					<ul class="nav navbar-nav">
 						<li class="active"><a class="js-link" data-page="page-players" href="#players">Players</a></li>
-						<li><a class="js-link" data-page="page-server" href="#server">Server</a></li>
+						<li>               <a class="js-link" data-page="page-server"  href="#server">Server</a></li>
+						<li>               <a class="js-link" data-page="page-chat"    href="#chat">Chat</a></li>
 					</ul>
 					<ul class="nav navbar-nav navbar-right">
 						<li><span class="navbar-text navbar-right">Last update: {{ last_update }}</span></li>
@@ -161,7 +162,7 @@
 								<th class="col c-last-login">Last login</th>
 								<th class="col c-longest-session">Longest session</th>
 								<th class="col c-deaths">Deaths</th>
-                                <th class="col c-ragequits">Rage quits</th>
+								<th class="col c-ragequits">Rage quits</th>
 								<th class="col c-achievements">Achievements</th>
 								<th class="col c-active-days">Active days</th>
 								<th class="col c-active-day-time">Time per day</th>
@@ -185,7 +186,7 @@
 								<td class="col c-last-login">{{ user.last_login }}</td>
 								<td class="col c-longest-session">{{ user.longest_session }}</td>
 								<td class="col c-deaths">{{ user.death_count }}</td>
-                                <td class="col c-ragequits">{{ user.ragequit_count }}</td>
+								<td class="col c-ragequits">{{ user.ragequit_count }}</td>
 								<td class="col c-achievements">{{ user.achievement_count }}</td>
 								<td class="col c-active-days">{{ user.active_days }}</td>
 								<td class="col c-active-day-time">{{ user.time_per_active_day }}</td>
@@ -215,6 +216,24 @@
 						<th>Maximum online players:</th>
 						<td>{{ server.max_players }} ({{ server.max_players_date }})</td>
 					</tr>
+				</table>
+			</div>
+			<div id="page-chat" class="page row">
+				<table class="table">
+					{% for chatday in chats %}
+					{% for chat in chatday.chat %}
+						{% if chatday.even_day %}
+						<tr class="active">
+						{% else %}
+						<tr class="success">
+						{% endif %}
+							<td> {{ chatday.date }} </td>
+							<td> {{ chat.time }}    </td>
+							<td> <a class="js-link" data-page="page-players-{{ chat.user }}" href="#players-{{ chat.user }}"> {{ chat.user }}:   </a></td>
+							<td> {{ chat.message}}  </td>
+						</tr>
+					{% endfor %}
+					{% endfor %}
 				</table>
 			</div>
 			{% for user in users %}
@@ -285,10 +304,10 @@
 							</td>
 						</tr>
 						{% endif %}
-                        <tr>
-                            <th>Rage quits:</th>
-                            <td>{{ user.ragequit_count}}</td>
-                        </tr>
+						<tr>
+							<th>Rage quits:</th>
+							<td>{{ user.ragequit_count}}</td>
+						</tr>
 						<tr>
 							<th>Achievements:</th>
 							<td>{{ user.achievement_count }} of {{ achievements_available }}</td>
