@@ -507,6 +507,9 @@ def main():
     parser.add_argument("-w", "--whitelist",
                         help="the whitelist of the server (only use included usernames)",
                         metavar="<whitelist>")
+    parser.add_argument("--nochat",
+                        action='store_true',
+                        help="ignore the general chat log")
     parser.add_argument("logdir",
                         help="the server log directory",
                         metavar="<logdir>")
@@ -520,7 +523,7 @@ def main():
         since = datetime.datetime.now() - datetime.timedelta(days=30)
     elif args['week']:
         since = datetime.datetime.now() - datetime.timedelta(days=7)
-    elif args["since"] is not None:
+    elif args['since'] is not None:
         try:
             d = time.strptime(args["since"], "%Y-%m-%d %H:%M:%S")
         except ValueError:
@@ -530,6 +533,8 @@ def main():
 
     whitelist_users = parse_whitelist(args["whitelist"]) if args["whitelist"] else None
     users, server, chats = parse_logs(args["logdir"], since, whitelist_users)
+    if args['nochat']:
+      chats = [] # ignore chat messages
 
     template_path = os.path.join(os.path.dirname(__file__), "template.html")
     if args["template"] is not None:

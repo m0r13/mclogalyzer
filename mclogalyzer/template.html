@@ -135,7 +135,9 @@
 					<ul class="nav navbar-nav">
 						<li class="active"><a class="js-link" data-page="page-players" href="#players">Players</a></li>
 						<li>               <a class="js-link" data-page="page-server"  href="#server">Server</a></li>
+            {% if chats|length %}
 						<li>               <a class="js-link" data-page="page-chat"    href="#chat">Chat</a></li>
+            {% endif %}
 					</ul>
 					<ul class="nav navbar-nav navbar-right">
 						<li><span class="navbar-text navbar-right">Last update: {{ last_update }}</span></li>
