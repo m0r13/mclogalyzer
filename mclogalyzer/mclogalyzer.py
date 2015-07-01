@@ -466,8 +466,8 @@ def parse_logs(logdir, since=None, whitelist_users=None):
 
         if len(thisChatDay._chat) > 0:
             chat.append(thisChatDay)
-            thisChatDay._chat = thisChatDay._chat[-1:0:-1] # reverse chat list so newest on top
-    chat = chat[-1:0:-1]
+            thisChatDay._chat = thisChatDay._chat[::-1] # reverse chat list so newest on top
+    chat = chat[::-1]
 
     if whitelist_users is not None:
         for username in whitelist_users:
@@ -507,9 +507,9 @@ def main():
     parser.add_argument("-w", "--whitelist",
                         help="the whitelist of the server (only use included usernames)",
                         metavar="<whitelist>")
-    parser.add_argument("--nochat",
+    parser.add_argument("--chat",
                         action='store_true',
-                        help="ignore the general chat log")
+                        help="display the general chat log")
     parser.add_argument("logdir",
                         help="the server log directory",
                         metavar="<logdir>")
@@ -533,8 +533,8 @@ def main():
 
     whitelist_users = parse_whitelist(args["whitelist"]) if args["whitelist"] else None
     users, server, chats = parse_logs(args["logdir"], since, whitelist_users)
-    if args['nochat']:
-      chats = [] # ignore chat messages
+    if not args['chat']:
+        chats = [] # ignore chat messages
 
     template_path = os.path.join(os.path.dirname(__file__), "template.html")
     if args["template"] is not None:
