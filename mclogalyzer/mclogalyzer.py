@@ -41,7 +41,7 @@ REGEX_ACHIEVEMENT = re.compile("\[Server thread\/INFO\]: ([^ ]+) has just earned
 # regular expression to get the username of a chat message
 # you need to change this if you have special chat prefixes or stuff like that
 # this regex works with chat messages of the format: <prefix username> chat message
-REGEX_CHAT_USERNAME = re.compile("\[Server thread\/INFO\]: <([^>]* )?([^ ]*)>")
+REGEX_CHAT_USERNAME = re.compile("\[Server thread\/INFO\]: <([^>]* )?([^ ]*)> (\w+)")
 
 DEATH_MESSAGES = (
     "was squashed by.*",
@@ -207,6 +207,43 @@ class UserStats:
     def ragequit_count(self):
         return self._ragequits
 
+class ChatLog:
+    def __init__(self, timestamp, user, msg):
+        self._time    = str("%02d:%02d:%02d"%(timestamp.hour,timestamp.minute,timestamp.second))
+        self._user    = user
+        self._message = msg
+
+    @property
+    def time(self):
+        return self._time
+    @property
+    def user(self):
+        return self._user
+    @property
+    def message(self):
+        return self._message
+
+class ChatDay:
+    def __init__(self, timestamp):
+        self._date     = str("%d-%02d-%02d"%(timestamp.year,timestamp.month,timestamp.day))
+        self._chat     = []
+        self._even_day = False;
+
+    # list of all chat messages on this day
+    @property
+    def chat(self):
+        return self._chat
+
+    # date of chat history
+    @property
+    def date(self):
+        return self._date
+
+    # tag every other day to increase readability on final document
+    @property
+    def even_day(self):
+        return self._even_day
+    
 
 class ServerStats:
     def __init__(self):
@@ -286,6 +323,8 @@ def grep_death(line):
             return search.group(1), capitalize_first(search.group(2))
     return None, None
 
+def grep_chatlog(line):
+    search
 
 def grep_achievement(line):
     search = REGEX_ACHIEVEMENT.search(line)
@@ -321,6 +360,7 @@ def parse_whitelist(whitelist_path):
 
 def parse_logs(logdir, since=None, whitelist_users=None):
     users = {}
+    chat = []
     server = ServerStats()
     online_players = set()
 
@@ -330,6 +370,7 @@ def parse_logs(logdir, since=None, whitelist_users=None):
             continue
 
         today = grep_logname_date(logname)
+        thisChatDay = ChatDay(today)
         if first_date is None:
             first_date = today
         print "Parsing log %s (%s) ..." % (logname, today)
@@ -413,12 +454,20 @@ def parse_logs(logdir, since=None, whitelist_users=None):
                             death_user._death_types[death_type] = 0
                         death_user._death_types[death_type] += 1
                 else:
+                    date = grep_log_datetime(today, line)
                     search = REGEX_CHAT_USERNAME.search(line)
                     if not search:
                         continue
                     username = search.group(2)
+                    chat_message = search.group(3)
                     if username in users:
                         users[username]._messages += 1
+                    thisChatDay._chat.append(ChatLog(date, username, chat_message))
+
+        if len(thisChatDay._chat) > 0:
+            chat.append(thisChatDay)
+            thisChatDay._chat = thisChatDay._chat[::-1] # reverse chat list so newest on top
+    chat = chat[::-1]
 
     if whitelist_users is not None:
         for username in whitelist_users:
@@ -432,7 +481,13 @@ def parse_logs(logdir, since=None, whitelist_users=None):
     for user in users:
         server._time_played += user._time
 
-    return users, server
+    for i in range(len(chat)):
+        if i%2:
+            chat[i]._even_day = True
+        else:
+            chat[i]._even_day = False
+
+    return users, server, chat
 
 
 def main():
@@ -452,6 +507,9 @@ def main():
     parser.add_argument("-w", "--whitelist",
                         help="the whitelist of the server (only use included usernames)",
                         metavar="<whitelist>")
+    parser.add_argument("--chat",
+                        action='store_true',
+                        help="display the general chat log")
     parser.add_argument("logdir",
                         help="the server log directory",
                         metavar="<logdir>")
@@ -465,7 +523,7 @@ def main():
         since = datetime.datetime.now() - datetime.timedelta(days=30)
     elif args['week']:
         since = datetime.datetime.now() - datetime.timedelta(days=7)
-    elif args["since"] is not None:
+    elif args['since'] is not None:
         try:
             d = time.strptime(args["since"], "%Y-%m-%d %H:%M:%S")
         except ValueError:
@@ -474,7 +532,9 @@ def main():
         since = datetime.datetime(*(d[0:6]))
 
     whitelist_users = parse_whitelist(args["whitelist"]) if args["whitelist"] else None
-    users, server = parse_logs(args["logdir"], since, whitelist_users)
+    users, server, chats = parse_logs(args["logdir"], since, whitelist_users)
+    if not args['chat']:
+        chats = [] # ignore chat messages
 
     template_path = os.path.join(os.path.dirname(__file__), "template.html")
     if args["template"] is not None:
@@ -493,6 +553,7 @@ def main():
     f = open(args["output"], "w")
     f.write(template.render(users=users,
                             server=server,
+                            chats=chats,
                             achievements_available=ACHIEVEMENTS_AVAILABLE,
                             last_update=time.strftime("%Y-%m-%d %H:%M:%S")))
     f.close()
