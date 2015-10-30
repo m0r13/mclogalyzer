@@ -281,6 +281,7 @@ def grep_log_datetime(date, line):
     try:
         d = time.strptime(line.split(" ")[0], "[%H:%M:%S]")
     except ValueError:
+        print "### Warning: Unable to parse date in line=%s" % line
         return None
     return datetime.datetime(
         year=date.year, month=date.month, day=date.day,
@@ -445,6 +446,9 @@ def parse_logs(logdir, since=None, whitelist_users=None):
             else:
                 death_username, death_type = grep_death(line)
                 death_time = grep_log_datetime(today, line)
+                if date is None or (since is not None and date < since):
+                    continue
+
                 if death_username is not None:
                     if death_username in users:
                         death_user = users[death_username]
@@ -455,6 +459,9 @@ def parse_logs(logdir, since=None, whitelist_users=None):
                         death_user._death_types[death_type] += 1
                 else:
                     date = grep_log_datetime(today, line)
+                    if date is None or (since is not None and date < since):
+                        continue
+
                     search = REGEX_CHAT_USERNAME.search(line)
                     if not search:
                         continue
