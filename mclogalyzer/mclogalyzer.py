@@ -41,7 +41,7 @@ REGEX_ACHIEVEMENT = re.compile("\[Server thread\/INFO\]: ([^ ]+) has just earned
 # regular expression to get the username of a chat message
 # you need to change this if you have special chat prefixes or stuff like that
 # this regex works with chat messages of the format: <prefix username> chat message
-REGEX_CHAT_USERNAME = re.compile("\[Server thread\/INFO\]: <([^>]* )?([^ ]*)> (\w+)")
+REGEX_CHAT_USERNAME = re.compile("\[Server thread\/INFO\]: <([^>]* )?([^ ]*)> (.+)")
 
 DEATH_MESSAGES = (
     "was squashed by.*",
